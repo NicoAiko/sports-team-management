@@ -1,7 +1,11 @@
-import { Router } from "@oak/oak/router";
+import { Application, Router } from "@oak/oak";
+import { RouterRegistry } from "./router-registry.ts";
 
-const router = new Router();
+export function useRouter(app: Application): void {
+  const router = new Router();
 
-// do something with the router
+  RouterRegistry.register(router);
 
-export { router };
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+}
