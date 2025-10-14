@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "@oak/commons": "jsr:@oak/commons@^1.0.1",
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/http": "jsr:@std/http@1",
+    "@oak/oak": "jsr:@oak/oak@^17.1.6"
+  }
+}
