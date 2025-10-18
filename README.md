@@ -29,7 +29,7 @@ Furthermore, the following frameworks are used within the Deno environment:
 ### Deno Tasks (see [deno.json](deno.json))
 
 - `deno task start` Starts the server
-- `deno task debug` Starts the server in watch mode (used for debugging)
+- `deno task dev` Starts the server in watch mode
 
 ## Roadmap - What's planned for version 1.0?
 
