@@ -1,10 +1,14 @@
-import { Controller, Get } from "../router/route-decorators.ts";
+import { inject } from '../../core/dependency-injection/inject.ts';
+import { LogService } from '../../core/logging/log.ts';
+import { Controller, Get } from '../../core/router/route-decorators.ts';
 
-@Controller("/hello-world")
+@Controller('/hello-world')
 export class HelloWorldController {
-  @Get("/")
+  #logService: LogService = inject(LogService);
+
+  @Get('/')
   public printHelloWorld(): number {
-    console.log("Hello world!");
+    this.#logService.info('hello world!', { foo: 'bar' });
 
     return 1;
   }
