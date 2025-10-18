@@ -1,8 +1,8 @@
 import { HttpMethod } from '@oak/commons/method';
-import { RouterRegistry } from './router-registry.ts';
-import { Ctor } from '../../shared/types/constructor.type.ts';
 import { Callable } from '../../shared/types/callable.type.ts';
+import { Ctor } from '../../shared/types/constructor.type.ts';
 import { inject } from '../dependency-injection/inject.ts';
+import { RouterRegistry } from './router-registry.ts';
 
 const ROUTE_META = Symbol('__metadata:route__');
 const routerRegistry = await inject(RouterRegistry);
@@ -13,19 +13,13 @@ type RouteMeta = {
   method: HttpMethod;
 };
 
-// TODO: Check if module name can be taken from context
+// TODO(#5): Check if module name can be taken from context
 export function Controller(
   prefix: string,
-  opts?: {
-    module?: string;
-  },
-) {
-  return (
-    cls: Ctor,
-    ctx: ClassDecoratorContext,
-  ) => {
-    const metas: RouteMeta[] =
-      (ctx.metadata as Record<symbol, RouteMeta[]>)[ROUTE_META] ?? [];
+  opts?: { module?: string },
+): Callable<void, [cls: Ctor, ctx: ClassDecoratorContext]> {
+  return (cls: Ctor, ctx: ClassDecoratorContext) => {
+    const metas: RouteMeta[] = (ctx.metadata as Record<symbol, RouteMeta[]>)[ROUTE_META] ?? [];
 
     for (const { propertyKey, path, method } of metas) {
       let fullPath = `${prefix}${path}`;
@@ -49,19 +43,19 @@ export function Controller(
   };
 }
 
-function createMethodDecorator(method: HttpMethod) {
-  return function (path: string) {
-    return (
-      value: Callable,
-      context: ClassMethodDecoratorContext,
-    ): Callable => {
-      const proto = (context.metadata) as Record<symbol, RouteMeta[]>;
+type MethodDecorator = (value: Callable, ctx: ClassMethodDecoratorContext) => Callable;
+type MethodDecoratorFactory = (path: string) => MethodDecorator;
+
+function createMethodDecorator(method: HttpMethod): MethodDecoratorFactory {
+  return function (path: string): MethodDecorator {
+    return (value: Callable, ctx: ClassMethodDecoratorContext): Callable => {
+      const proto = (ctx.metadata) as Record<symbol, RouteMeta[]>;
 
       if (!proto[ROUTE_META]) {
         proto[ROUTE_META] = [];
       }
 
-      proto[ROUTE_META].push({ propertyKey: context.name, path, method });
+      proto[ROUTE_META].push({ propertyKey: ctx.name, path, method });
 
       return value;
     };

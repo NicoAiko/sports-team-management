@@ -42,9 +42,7 @@ export class LogService {
     }
 
     const curTimestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-    const logLevelKey = Object.entries(LogLevel).find(([_, lvl]) =>
-      lvl === level
-    )?.[0];
+    const logLevelKey = Object.entries(LogLevel).find(([_, lvl]) => lvl === level)?.[0];
 
     // deno-lint-ignore no-console
     console.log(

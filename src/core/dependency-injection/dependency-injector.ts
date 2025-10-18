@@ -1,11 +1,7 @@
 import { Ctor } from '../../shared/types/constructor.type.ts';
-import {
-  DEFAULT_MODULE_NAME,
-  GLOBAL_META,
-  INJECTABLE_META,
-} from './symbols.ts';
 import { InjectionConfig } from './decorators.ts';
 import { implementsOnInit } from './on-init.interface.ts';
+import { DEFAULT_MODULE_NAME, GLOBAL_META, INJECTABLE_META } from './symbols.ts';
 
 export class DependencyInjector {
   static #modules = new Map<string | symbol, Set<Ctor>>();
@@ -19,7 +15,7 @@ export class DependencyInjector {
       this.#modules.set(moduleName, new Set());
     }
 
-    // TODO: Check if we want to check here for duplicate module names so we can avoid registering multiple modules with the "same name"
+    // TODO(#6): Check if we want to check here for duplicate module names so we can avoid registering multiple modules with the "same name"
     const set = this.#modules.get(moduleName)!;
 
     for (const item of providers) {
@@ -35,7 +31,7 @@ export class DependencyInjector {
     this.#modules.get(GLOBAL_META)!.add(provider);
   }
 
-  public static clear() {
+  public static clear(): void {
     this.#modules.clear();
     this.#moduleSingletons.clear();
     this.#globalSingletons.clear();
@@ -45,10 +41,9 @@ export class DependencyInjector {
     token: Ctor<T>,
     moduleName?: string,
   ): Promise<T> {
-    const meta =
-      (token as unknown as Record<symbol, InjectionConfig | undefined>)[
-        INJECTABLE_META
-      ];
+    const meta = (token as unknown as Record<symbol, InjectionConfig | undefined>)[
+      INJECTABLE_META
+    ];
     const scope = meta?.scope ?? 'module';
 
     if (scope === 'global') {
@@ -87,10 +82,9 @@ export class DependencyInjector {
     ctor: Ctor<T>,
     moduleName?: string,
   ): Promise<T> {
-    const meta =
-      (ctor as unknown as Record<symbol, InjectionConfig | undefined>)[
-        INJECTABLE_META
-      ];
+    const meta = (ctor as unknown as Record<symbol, InjectionConfig | undefined>)[
+      INJECTABLE_META
+    ];
     const dependencies = meta?.dependencies ?? [];
 
     const resolvedDependencies = await Promise.all(

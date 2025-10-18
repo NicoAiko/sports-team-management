@@ -12,11 +12,30 @@
     "@oak/oak": "jsr:@oak/oak@^17.1.6"
   },
   "fmt": {
-    "singleQuote": true
+    "singleQuote": true,
+    "lineWidth": 100,
+    "useTabs": false,
+    "semiColons": true
   },
   "lint": {
     "rules": {
-      "include": ["no-console"]
+      "tags": ["recommended"],
+      "include": [
+        "ban-untagged-todo",
+        "camelcase",
+        "eqeqeq",
+        "explicit-function-return-type",
+        "no-console",
+        "no-const-assign",
+        "no-eval",
+        "no-external-import",
+        "no-non-null-asserted-optional-chain",
+        "no-self-compare",
+        "no-sparse-arrays",
+        "no-useless-rename",
+        "no-undef",
+        "prefer-ascii"
+      ]
     }
   }
 }
