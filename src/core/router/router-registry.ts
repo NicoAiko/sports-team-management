@@ -17,13 +17,13 @@ export class RouterRegistry {
   }
 
   public static register(router: Router): void {
+    const logService = inject(LogService);
+
     if (this.#isRegistered) {
-      // TODO: Log that routes are already registered!
+      logService.error(`Attemted to register routes twice!`);
 
       throw new Error('Attempt to register routes twice!');
     }
-
-    const logService = inject(LogService);
 
     this.#routes.forEach((route) => {
       // deno-lint-ignore no-explicit-any
