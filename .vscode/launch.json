@@ -13,8 +13,12 @@
       "env": {},
       "runtimeExecutable": "/usr/local/bin/deno",
       "runtimeArgs": [
-        "task",
-        "debug"
+        "run",
+        "--watch",
+        "--allow-net",
+        "--allow-env",
+        "--env-file",
+        "--inspect-wait"
       ],
       "attachSimplePort": 9229
     }
