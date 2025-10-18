@@ -1,1 +1,1 @@
-import "./hello-world/index.ts";
+import './hello-world/index.ts';

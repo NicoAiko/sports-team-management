@@ -1,1 +1,1 @@
-import "./controller.ts";
+import './controller.ts';
