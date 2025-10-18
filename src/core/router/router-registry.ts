@@ -1,8 +1,8 @@
 import { Router } from '@oak/oak/router';
-import { DependencyInjector } from '../dependency-injection/dependency-injector.ts';
-import type { RegistryRoute } from './registry-route.type.ts';
-import { LogService } from '../logging/log.ts';
 import { Injectable } from '../dependency-injection/decorators.ts';
+import { DependencyInjector } from '../dependency-injection/dependency-injector.ts';
+import { LogService } from '../logging/log.ts';
+import type { RegistryRoute } from './registry-route.type.ts';
 
 @Injectable({ global: true, dependencies: [LogService] })
 export class RouterRegistry {

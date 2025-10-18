@@ -11,7 +11,7 @@ export class HelloWorldController {
     private readonly postgresClient: PostgresClient,
   ) {}
 
-  @Get('/')
+  @Get()
   public printHelloWorld(): number {
     this.logService.info('hello world!', { foo: 'bar' });
 

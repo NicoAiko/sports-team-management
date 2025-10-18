@@ -9,7 +9,7 @@ const routerRegistry = await inject(RouterRegistry);
 
 type RouteMeta = {
   propertyKey: string | symbol;
-  path: string;
+  path?: string;
   method: HttpMethod;
 };
 
@@ -22,7 +22,7 @@ export function Controller(
     const metas: RouteMeta[] = (ctx.metadata as Record<symbol, RouteMeta[]>)[ROUTE_META] ?? [];
 
     for (const { propertyKey, path, method } of metas) {
-      let fullPath = `${prefix}${path}`;
+      let fullPath = `${prefix}${path ?? ''}`;
 
       if (!fullPath.startsWith('/')) {
         fullPath = `/${fullPath}`;
@@ -44,10 +44,10 @@ export function Controller(
 }
 
 type MethodDecorator = (value: Callable, ctx: ClassMethodDecoratorContext) => Callable;
-type MethodDecoratorFactory = (path: string) => MethodDecorator;
+type MethodDecoratorFactory = (path?: string) => MethodDecorator;
 
 function createMethodDecorator(method: HttpMethod): MethodDecoratorFactory {
-  return function (path: string): MethodDecorator {
+  return function (path?: string): MethodDecorator {
     return (value: Callable, ctx: ClassMethodDecoratorContext): Callable => {
       const proto = (ctx.metadata) as Record<symbol, RouteMeta[]>;
 
