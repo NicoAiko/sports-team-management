@@ -1,33 +1,27 @@
 import { Router } from '@oak/oak/router';
 import { DependencyInjector } from '../dependency-injection/dependency-injector.ts';
 import type { RegistryRoute } from './registry-route.type.ts';
-import { inject } from '../dependency-injection/inject.ts';
 import { LogService } from '../logging/log.ts';
+import { Injectable } from '../dependency-injection/decorators.ts';
 
+@Injectable({ global: true, dependencies: [LogService] })
 export class RouterRegistry {
-  static #routes: RegistryRoute[] = [];
-  static #isRegistered: boolean = false;
+  private routes: RegistryRoute[] = [];
 
-  public static addRoute(route: RegistryRoute): void {
-    this.#routes.push(route);
+  constructor(private readonly logService: LogService) {}
+
+  public addRoute(route: RegistryRoute): void {
+    this.routes.push(route);
   }
 
-  public static getRoutes(): RegistryRoute[] {
-    return this.#routes;
+  public getRoutes(): RegistryRoute[] {
+    return this.routes;
   }
 
-  public static register(router: Router): void {
-    const logService = inject(LogService);
-
-    if (this.#isRegistered) {
-      logService.error(`Attemted to register routes twice!`);
-
-      throw new Error('Attempt to register routes twice!');
-    }
-
-    this.#routes.forEach((route) => {
+  public async register(router: Router): Promise<void> {
+    for (const route of this.routes) {
       // deno-lint-ignore no-explicit-any
-      const instance = DependencyInjector.resolve<any>(
+      const instance = await DependencyInjector.resolve<any>(
         route.classConstructor,
         route.module,
       );
@@ -43,15 +37,13 @@ export class RouterRegistry {
           break;
       }
 
-      logService.debug(
+      this.logService.debug(
         `Route "${route.methodName.toString()} (${route.method} ${route.routePath})" has been registered`,
       );
-    });
+    }
 
-    logService.debug(
-      `A total of ${this.#routes.length} routes have been registered`,
+    this.logService.debug(
+      `A total of ${this.routes.length} routes have been registered`,
     );
-
-    this.#isRegistered = true;
   }
 }

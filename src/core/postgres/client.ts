@@ -1,18 +1,16 @@
 import { Client } from '@db/postgres';
 import { Injectable } from '../dependency-injection/decorators.ts';
 import type { OnInit } from '../dependency-injection/on-init.interface.ts';
-import { inject } from '../dependency-injection/inject.ts';
 import { LogService } from '../logging/log.ts';
 
-@Injectable({ global: true })
+@Injectable({ global: true, dependencies: [LogService] })
 export class PostgresClient implements OnInit {
-  #logService = inject(LogService);
-  #client: Client;
+  private readonly client: Client;
 
-  constructor() {
+  constructor(private readonly logService: LogService) {
     this.validateConfig();
 
-    this.#client = new Client({
+    this.client = new Client({
       user: Deno.env.get('POSTGRES_USER'),
       password: Deno.env.get('POSTGRES_PASSWORD'),
       hostname: Deno.env.get('POSTGRES_HOST'),
@@ -22,18 +20,18 @@ export class PostgresClient implements OnInit {
   }
 
   public async onInit(): Promise<void> {
-    this.#logService.debug('Connecting to postgres database...');
-    await this.#client.connect();
+    this.logService.debug('Connecting to postgres database...');
+    await this.client.connect();
 
-    this.#logService.debug('Connected.');
+    this.logService.debug('Connected.');
   }
 
   public async destroy(): Promise<void> {
-    this.#logService.debug('Gracefully disconnecting from postgres database');
+    this.logService.debug('Gracefully disconnecting from postgres database');
 
-    await this.#client.end();
+    await this.client.end();
 
-    this.#logService.debug('Disconnected');
+    this.logService.debug('Disconnected');
   }
 
   private validateConfig(): void | never {

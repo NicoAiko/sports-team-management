@@ -5,6 +5,7 @@ import {
   INJECTABLE_META,
 } from './symbols.ts';
 import { InjectionConfig } from './decorators.ts';
+import { implementsOnInit } from './on-init.interface.ts';
 
 export class DependencyInjector {
   static #modules = new Map<string | symbol, Set<Ctor>>();
@@ -40,7 +41,10 @@ export class DependencyInjector {
     this.#globalSingletons.clear();
   }
 
-  public static resolve<T>(token: Ctor<T>, moduleName?: string): T {
+  public static async resolve<T>(
+    token: Ctor<T>,
+    moduleName?: string,
+  ): Promise<T> {
     const meta =
       (token as unknown as Record<symbol, InjectionConfig | undefined>)[
         INJECTABLE_META
@@ -52,7 +56,7 @@ export class DependencyInjector {
         return this.#globalSingletons.get(token);
       }
 
-      const instance = this.instantiate(token, moduleName);
+      const instance = await this.instantiate(token, moduleName);
 
       this.#globalSingletons.set(token, instance);
 
@@ -72,34 +76,45 @@ export class DependencyInjector {
       return map.get(token);
     }
 
-    const instance = this.instantiate(token, moduleName);
+    const instance = await this.instantiate(token, moduleName);
 
     map.set(token, instance);
 
     return instance;
   }
 
-  private static instantiate<T>(ctor: Ctor<T>, moduleName?: string): T {
+  private static async instantiate<T>(
+    ctor: Ctor<T>,
+    moduleName?: string,
+  ): Promise<T> {
     const meta =
       (ctor as unknown as Record<symbol, InjectionConfig | undefined>)[
         INJECTABLE_META
       ];
     const dependencies = meta?.dependencies ?? [];
 
-    const resolvedDependencies = dependencies.map((dependencyToken) => {
-      if (
-        dependencyToken && typeof dependencyToken === 'object' &&
-        ('token' in dependencyToken)
-      ) {
-        return DependencyInjector.resolve(
-          dependencyToken.token,
-          dependencyToken.module,
-        );
-      }
+    const resolvedDependencies = await Promise.all(
+      dependencies.map((dependencyToken) => {
+        if (
+          dependencyToken && typeof dependencyToken === 'object' &&
+          ('token' in dependencyToken)
+        ) {
+          return DependencyInjector.resolve(
+            dependencyToken.token,
+            dependencyToken.module,
+          );
+        }
 
-      return DependencyInjector.resolve(dependencyToken, moduleName);
-    });
+        return DependencyInjector.resolve(dependencyToken, moduleName);
+      }),
+    );
 
-    return new ctor(...resolvedDependencies);
+    const instance = new ctor(...resolvedDependencies);
+
+    if (implementsOnInit(instance)) {
+      await instance.onInit();
+    }
+
+    return instance;
   }
 }

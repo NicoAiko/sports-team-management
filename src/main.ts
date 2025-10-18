@@ -7,20 +7,25 @@ import { LogService } from './core/logging/log.ts';
 
 const app = new Application();
 const port = Number(Deno.env.get('HTTP_PORT') ?? 3000);
+const logService = await inject(LogService);
+const postgresClient = await inject(PostgresClient);
 
-Deno.addSignalListener('SIGINT', async () => {
-  const postgresClient = inject(PostgresClient);
-  const logService = inject(LogService);
+const onShutdown = async (): Promise<void> => {
+  // To prevent the handler being called twice,
+  // we're removing the listener after the first call
+  Deno.removeSignalListener('SIGINT', onShutdown);
 
   await postgresClient.destroy();
 
   logService.debug('Shutting down...');
   Deno.exit(0);
-});
+};
+
+Deno.addSignalListener('SIGINT', onShutdown);
 
 // Register router and routes - modifies `app`
-useRouter(app);
+await useRouter(app);
 
-inject(LogService).debug(`Running server on http://localhost:${port}`);
+logService.debug(`Running server on http://localhost:${port}`);
 
-app.listen({ port });
+await app.listen({ port });

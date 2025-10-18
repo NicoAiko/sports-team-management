@@ -2,8 +2,10 @@ import { HttpMethod } from '@oak/commons/method';
 import { RouterRegistry } from './router-registry.ts';
 import { Ctor } from '../../shared/types/constructor.type.ts';
 import { Callable } from '../../shared/types/callable.type.ts';
+import { inject } from '../dependency-injection/inject.ts';
 
 const ROUTE_META = Symbol('__metadata:route__');
+const routerRegistry = await inject(RouterRegistry);
 
 type RouteMeta = {
   propertyKey: string | symbol;
@@ -12,7 +14,12 @@ type RouteMeta = {
 };
 
 // TODO: Check if module name can be taken from context
-export function Controller(prefix: string, opts?: { module?: string }) {
+export function Controller(
+  prefix: string,
+  opts?: {
+    module?: string;
+  },
+) {
   return (
     cls: Ctor,
     ctx: ClassDecoratorContext,
@@ -31,7 +38,7 @@ export function Controller(prefix: string, opts?: { module?: string }) {
         fullPath = fullPath.slice(0, -1);
       }
 
-      RouterRegistry.addRoute({
+      routerRegistry.addRoute({
         classConstructor: cls,
         methodName: propertyKey,
         routePath: fullPath,
