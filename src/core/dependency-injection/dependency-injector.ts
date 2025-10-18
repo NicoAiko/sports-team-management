@@ -44,9 +44,9 @@ export class DependencyInjector {
     const meta = (token as unknown as Record<symbol, InjectionConfig | undefined>)[
       INJECTABLE_META
     ];
-    const scope = meta?.scope ?? 'module';
+    const isGlobalScope = !!meta?.global;
 
-    if (scope === 'global') {
+    if (isGlobalScope) {
       if (this.#globalSingletons.has(token)) {
         return this.#globalSingletons.get(token);
       }
