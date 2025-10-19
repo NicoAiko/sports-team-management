@@ -22,7 +22,7 @@ export function Controller(
     const metas: RouteMeta[] = (ctx.metadata as Record<symbol, RouteMeta[]>)[ROUTE_META] ?? [];
 
     for (const { propertyKey, path, method } of metas) {
-      let fullPath = `${prefix}${path ?? ''}`;
+      let fullPath = `${prefix}/${path ?? ''}`.replace('//', '/');
 
       if (!fullPath.startsWith('/')) {
         fullPath = `/${fullPath}`;
