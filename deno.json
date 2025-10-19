@@ -1,7 +1,14 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-env --env-file --allow-read --allow-write src/main.ts",
-    "dev": "deno run --allow-net --allow-env --env-file --allow-read --allow-write --watch src/main.ts"
+    "start": {
+      "command": "deno run --allow-net --allow-env --env-file --allow-read --allow-write src/main.ts",
+      "dependencies": ["check"]
+    },
+    "dev": {
+      "command": "deno run --check --allow-net --allow-env --env-file --allow-read --allow-write --watch src/main.ts",
+      "dependencies": ["check"]
+    },
+    "check": "deno check --all"
   },
   "imports": {
     "@db/postgres": "jsr:@db/postgres@^0.19.5",
