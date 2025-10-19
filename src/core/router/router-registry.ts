@@ -1,3 +1,4 @@
+import { isHttpError, type RouterContext } from '@oak/oak';
 import { Router } from '@oak/oak/router';
 import { Injectable } from '../dependency-injection/decorators.ts';
 import { DependencyInjector } from '../dependency-injection/dependency-injector.ts';
@@ -29,11 +30,44 @@ export class RouterRegistry {
         instance,
       );
 
+      const routeMiddleware = async (ctx: RouterContext<string>) => {
+        try {
+          ctx.response.body = await handler(ctx);
+        } catch (error) {
+          if (isHttpError(error)) {
+            ctx.response.status = error.status;
+            ctx.response.body = {
+              status: error.status,
+              message: error.message,
+              name: error.name,
+              error: error.cause,
+            };
+          } else {
+            ctx.response.status = 500;
+            ctx.response.body = {
+              status: 500,
+              message: 'An unexpected error occurred!',
+              error: JSON.stringify(error),
+            };
+          }
+        }
+      };
+
       switch (route.method) {
         case 'GET':
-          router.get(route.routePath, async (ctx) => {
-            ctx.response.body = await handler(ctx);
-          });
+          router.get(route.routePath, routeMiddleware);
+          break;
+
+        case 'POST':
+          router.post(route.routePath, routeMiddleware);
+          break;
+
+        case 'PUT':
+          router.put(route.routePath, routeMiddleware);
+          break;
+
+        case 'DELETE':
+          router.delete(route.routePath, routeMiddleware);
           break;
       }
 
