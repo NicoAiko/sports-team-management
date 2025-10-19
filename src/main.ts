@@ -1,21 +1,21 @@
 import { Application } from '@oak/oak';
 import { inject } from './core/dependency-injection/inject.ts';
 import { LogService } from './core/logging/log.ts';
-import { PostgresClient } from './core/postgres/client.ts';
+import { PostgresModule } from './core/postgres/module.ts';
 import { useRouter } from './core/router/router.ts';
 import './modules/app-modules.ts';
 
 const app = new Application();
 const port = Number(Deno.env.get('HTTP_PORT') ?? 3000);
 const logService = await inject(LogService);
-const postgresClient = await inject(PostgresClient);
+const postgresModule = await inject(PostgresModule);
 
 const onShutdown = async (): Promise<void> => {
   // To prevent the handler from being called twice,
   // we're removing the listener after the first call
   Deno.removeSignalListener('SIGINT', onShutdown);
 
-  await postgresClient.destroy();
+  await postgresModule.destroy();
 
   logService.debug('Shutting down...');
   Deno.exit(0);
